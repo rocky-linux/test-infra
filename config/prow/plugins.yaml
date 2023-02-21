@@ -1,0 +1,25 @@
+plugins:
+  rocky-linux:
+    plugins:
+      - approve
+      - assign
+      - help
+      - heart
+      - hold
+      - label
+      - lgtm
+      - mergecommitblocker
+      - trigger
+      - verify-owners
+      - wip
+      - yuks
+
+config_updater:
+  maps:
+    config/prow/config.yaml:
+      name: config
+    config/prow/plugins.yaml:
+      name: plugins
+    config/jobs/**/*.{yaml,yml}:
+      name: job-config
+      gzip: true

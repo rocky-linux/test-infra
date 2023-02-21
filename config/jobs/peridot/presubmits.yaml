@@ -1,0 +1,80 @@
+presubmits:
+  rocky-linux/peridot:
+    - name: pull-peridot-validate-prow-yaml
+      run_if_changed: '^(config/prow/(config|plugins).yaml$|config/jobs/.*.yaml$)'
+      decorate: true
+      spec:
+        containers:
+          - image: gcr.io/k8s-prow/checkconfig:v20221028-a8625c1f93
+            command:
+              - checkconfig
+            args:
+              - --config-path=config/prow/config.yaml
+              - --job-config-path=config/jobs
+              - --plugin-config=config/prow/plugins.yaml
+              - --strict
+
+    - name: pull-peridot-unit-test
+      branches:
+        - main
+      always_run: true
+      decorate: true
+      spec:
+        tolerations:
+          - key: peridot.rockylinux.org/workflow-tolerates-arch
+            operator: Equal
+            value: amd64
+            effect: NoSchedule
+        nodeSelector:
+          peridot.rockylinux.org/workflow-tolerates-arch: amd64
+        containers:
+          - image: quay.io/peridot/ci:v0.3.19
+            command:
+              - hack/unit_tests.sh
+
+    - name: pull-peridot-non-manual-build
+      branches:
+        - main
+      always_run: true
+      decorate: true
+      spec:
+        tolerations:
+          - key: peridot.rockylinux.org/workflow-tolerates-arch
+            operator: Equal
+            value: amd64
+            effect: NoSchedule
+        nodeSelector:
+          peridot.rockylinux.org/workflow-tolerates-arch: amd64
+        containers:
+          - image: quay.io/peridot/ci:v0.3.19
+            command:
+              - hack/non_manual_build.sh
+
+    - name: pull-peridot-build-impacted-frontend
+      branches:
+        - main
+      always_run: true
+      decorate: true
+      spec:
+        tolerations:
+          - key: peridot.rockylinux.org/workflow-tolerates-arch
+            operator: Equal
+            value: amd64
+            effect: NoSchedule
+        nodeSelector:
+          peridot.rockylinux.org/workflow-tolerates-arch: amd64
+        containers:
+          - image: quay.io/peridot/ci:v0.3.19
+            command:
+              - hack/frontend_build.sh
+
+    - name: pull-peridot-gofmt-check
+      branches:
+        - main
+      always_run: true
+      decorate: true
+      spec:
+        containers:
+          - image: quay.io/peridot/ci:v0.3.19
+            command:
+              - hack/gofmt_check.sh
